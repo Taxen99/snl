@@ -294,10 +294,8 @@ inline void connect(std::string addr, uint16_t port, connection_handler handler)
     close(sockfd);
 }
 
-template<class T>
-class safe;
-
 namespace sync {
+
 template<class T>
 class lock
 {
@@ -332,6 +330,7 @@ private:
     T data;
     std::mutex mtx;
 };
+
 }
 
 namespace parsing {

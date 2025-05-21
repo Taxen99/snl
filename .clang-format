@@ -1,0 +1,12 @@
+---
+BasedOnStyle: Mozilla
+IndentWidth: 4
+PackConstructorInitializers: NextLine
+AccessModifierOffset: -4
+ColumnLimit: 120
+# ReflowComments: false
+# Force pointers to the type for C++.
+DerivePointerAlignment: false
+PointerAlignment: Left
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None

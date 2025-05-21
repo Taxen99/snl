@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.10)
+project(imagefun)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD_REQUIRED True)
+
+add_executable(server "src/server.cpp")
+add_executable(client "src/client.cpp")
+target_compile_definitions(server PUBLIC WORKING_DIRECTORY="${PROJECT_SOURCE_DIR}/")
+# target_compile_definitions(client PUBLIC WORKING_DIRECTORY="${PROJECT_SOURCE_DIR}/")

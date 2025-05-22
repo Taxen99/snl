@@ -55,10 +55,10 @@ public:
 private:
 };
 
-class connection_unknown_exception : public connection_exception
+class unknown_connection_exception : public connection_exception
 {
 public:
-    explicit connection_unknown_exception(const std::string& message) : connection_exception(message) {}
+    explicit unknown_connection_exception(const std::string& message) : connection_exception(message) {}
 
 private:
 };
@@ -74,7 +74,7 @@ inline std::string recv(int fd)
     if (ret == 0)
         throw connection_closed_exception{ "" };
     else if (ret != sizeof(remaining))
-        throw connection_unknown_exception{ "" };
+        throw unknown_connection_exception{ "" };
     std::string string{};
     string.resize(remaining);
     char* data = string.data();
@@ -83,7 +83,7 @@ inline std::string recv(int fd)
         if (recv == 0)
             throw connection_closed_exception{ "" };
         else if (recv == -1)
-            throw connection_unknown_exception{ "" };
+            throw unknown_connection_exception{ "" };
         remaining -= recv;
         data += recv;
     }
@@ -110,7 +110,7 @@ public:
         timeval timeout{};
         int ret = select(fd + 1, &rfd, NULL, NULL, &timeout);
         if (ret == -1) {
-            throw connection_unknown_exception{ "" };
+            throw unknown_connection_exception{ "" };
         } else if (ret == 0) {
             return {};
         } else if (FD_ISSET(fd, &rfd)) {
@@ -124,12 +124,12 @@ public:
         const char* p = data.data();
         int remaining = data.size();
         if (::send(fd, &remaining, sizeof(remaining), 0) != sizeof(remaining)) {
-            throw connection_unknown_exception{ "" };
+            throw unknown_connection_exception{ "" };
         }
         while (remaining > 0) {
             int sent = ::send(fd, p, remaining, 0);
             if (sent == -1)
-                throw connection_unknown_exception{ "" };
+                throw unknown_connection_exception{ "" };
             remaining -= sent;
             p += sent;
         }
@@ -195,17 +195,17 @@ inline void serve(uint16_t port, connection_handler handler)
     hints.ai_flags = AI_PASSIVE;
 
     if (getaddrinfo(NULL, std::to_string(port).c_str(), &hints, &res) != 0) {
-        throw connection_unknown_exception{ "" };
+        throw unknown_connection_exception{ "" };
     }
 
     for (r = res; r != NULL; r = r->ai_next) {
         sockfd = socket(r->ai_family, r->ai_socktype, r->ai_protocol);
         if (sockfd == -1) {
-            throw connection_unknown_exception{ "" };
+            throw unknown_connection_exception{ "" };
         }
         int yes = 1;
         if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-            throw connection_unknown_exception{ "" };
+            throw unknown_connection_exception{ "" };
         }
         if (bind(sockfd, r->ai_addr, r->ai_addrlen) == -1) {
             close(sockfd);
@@ -215,11 +215,11 @@ inline void serve(uint16_t port, connection_handler handler)
     }
     freeaddrinfo(res);
     if (r == NULL) {
-        throw connection_unknown_exception{ "" };
+        throw unknown_connection_exception{ "" };
     }
 #define BACKLOG 10
     if (listen(sockfd, BACKLOG) == -1) {
-        throw connection_unknown_exception{ "" };
+        throw unknown_connection_exception{ "" };
     }
 
     char s[INET6_ADDRSTRLEN];
@@ -266,13 +266,13 @@ inline void connect(std::string addr, uint16_t port, connection_handler handler)
     hints.ai_socktype = SOCK_STREAM;
 
     if (getaddrinfo(addr.c_str(), std::to_string(port).c_str(), &hints, &res) != 0) {
-        throw connection_unknown_exception{ "" };
+        throw unknown_connection_exception{ "" };
     }
 
     for (r = res; r != NULL; r = r->ai_next) {
         sockfd = socket(r->ai_family, r->ai_socktype, r->ai_protocol);
         if (sockfd == -1) {
-            throw connection_unknown_exception{ "" };
+            throw unknown_connection_exception{ "" };
         }
         if (::connect(sockfd, r->ai_addr, r->ai_addrlen) == -1) {
             close(sockfd);
@@ -282,7 +282,7 @@ inline void connect(std::string addr, uint16_t port, connection_handler handler)
     }
     freeaddrinfo(res);
     if (r == NULL) {
-        throw connection_unknown_exception{ "" };
+        throw unknown_connection_exception{ std::format("could not connect to {}:{}", addr, port) };
     }
 
     connection conn{ sockfd };

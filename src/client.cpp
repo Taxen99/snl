@@ -1,4 +1,5 @@
 #include "snl.hpp"
+#include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <print>
@@ -6,7 +7,9 @@
 
 int main()
 {
-    const std::string user = std::getenv("USER");
+    const char* user_cstr = std::getenv("USER");
+    assert(user_cstr && "could not find user env variable");
+    const std::string user = user_cstr;
     snl::connect("127.0.0.1", 1234, [&](snl::connection& conn) {
         std::string in;
         auto parser = snl::parsing::message_parser_builder{}
